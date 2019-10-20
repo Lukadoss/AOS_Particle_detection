@@ -7,19 +7,12 @@ abstract class EdgeMath {
         else              return a;
     }
 
-    int[][] rotateConv(int[][] conv, int dir) {
+    int[][] rotateConv(int[][] conv1, int dir) {
         dir = 8-dir;
         for (int i = dir;i>0 && i<8;i--){
-            conv = rotateMatrix(conv);
+            conv1 = rotateMatrix(conv1);
         }
-
-//        for (int i=0;i<3;i++){
-//            for (int j=0;j<3;j++){
-//                System.out.print(conv[i][j]+" ");
-//            }
-//            System.out.println();
-//        }
-        return conv;
+        return conv1;
     }
 
     private int[][] rotateMatrix(int[][] mat) {
@@ -76,62 +69,13 @@ abstract class EdgeMath {
             col++;
         }
 
+//        for (int i=0;i<3;i++){
+//            for (int j=0;j<3;j++){
+//                System.out.print(mat[i][j]+" ");
+//            }
+//            System.out.println();
+//        }
+
         return mat;
-    }
-
-    private double LoG(double sigma, int x, int y){
-        return (-(1/(Math.PI*sigma*sigma*sigma*sigma))*(1-(x*x+y*y)/(2*sigma*sigma))*Math.pow(Math.E,-(x*x+y*y)/ (2*sigma*sigma)));
-    }
-    
-    double[][] logKernel(double sigma, int size){
-        double [][] kernel = new double[size][size];
-        int pyj = size/2;
-        for(int i=0-pyj;i<pyj+1;i++){
-            for(int j=0-pyj;j<pyj+1;j++){
-                kernel[i+pyj][j+pyj]=LoG(sigma, i, j);
-            }
-        }
-
-//        for (int i=0;i<size;i++){
-//            for (int j=0;j<size;j++){
-//                System.out.print(kernel[i][j]+" ");
-//            }
-//            System.out.println();
-//        }
-
-        return kernel;
-    }
-    
-    private double gaussian(double sigma, int x, int y){
-        return ((1/(2*Math.PI*sigma*sigma)) * Math.pow(Math.E,-(x*x+y*y)/ (2*sigma*sigma)));
-    }
-
-    double[][] gaussianKernel(double sigma, int size){
-        double [][] kernel = new double[size][size];
-        int pyj = size/2;
-            for(int i=0-pyj;i<pyj+1;i++){
-                for(int j=0-pyj;j<pyj+1;j++){
-                    kernel[i+pyj][j+pyj]=gaussian(sigma, i, j);
-            }
-        }
-
-//        for (int i=0;i<size;i++){
-//            for (int j=0;j<size;j++){
-//                System.out.print(kernel[i][j]+" ");
-//            }
-//            System.out.println();
-//        }
-
-        return kernel;
-    }
-
-    double getKernelSum(double[][] kernel){
-        double sum = 0;
-        for(int j=0;j<kernel.length;++j){
-            for(int i=0;i<kernel.length;++i){
-                sum = sum + kernel[i][j];
-            }
-        }
-        return sum;
     }
 }

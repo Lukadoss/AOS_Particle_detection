@@ -5,6 +5,7 @@
 
 <BorderPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.GuiController">
    <center>
-      <Label text="Detekce hran ve snímku (detekce v definovaném směru, směr maximálního gradientu, metody masek, Laplaceův operátor, detekce čáry a bodu, speciální hranové detektory – Canny, Marr-Hildereth)" textAlignment="CENTER" wrapText="true" BorderPane.alignment="CENTER" />
+      <Label
+              text="Detekce částic – pro počítání počtu objektů (stop) ve snímku použijte metody, která vychází z vyhodnocení obvodu a obsahu stop (histogram obsahu stop a násobnost kruhové stopy); Metody testujte na snímcích, ve kterých vygenerujete náhodný (ale známý) počet stop s náhodným poloměrem a souřadnicemi, tj. budete simulovat různou energii dopadající částice a násobnost expozice." textAlignment="CENTER" wrapText="true" BorderPane.alignment="CENTER" />
    </center>
 </BorderPane>

@@ -9,7 +9,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("gui.fxml"));
-        primaryStage.setTitle("Detekce hran ve snímku - Petr Lukašík - ZVI");
+        primaryStage.setTitle("Detekce částic ve snímku - Petr Lukašík - AOS");
         primaryStage.setScene(new Scene(root, MainConfig.WIDTH, MainConfig.HEIGHT));
         primaryStage.setMinWidth(MainConfig.minWIDTH);
         primaryStage.setMinHeight(MainConfig.minHEIGHT);

@@ -9,7 +9,7 @@ import java.io.IOException;
  * Created by Lukado on 23. 11. 2016.
  */
 class ImageController {
-    BufferedImage readImage(String fileLocation) {
+    static BufferedImage readImage(String fileLocation) {
         BufferedImage img = null;
         try {
             img = ImageIO.read(new File(fileLocation));
@@ -19,10 +19,10 @@ class ImageController {
         return img;
     }
 
-    void writeImage(BufferedImage img, String fileLocation, String extension) {
+    static void writeImage(BufferedImage img, String fileLocation, String extension) {
         try {
             File outfile = new File(fileLocation);
-            if (!outfile.exists()) new File("img/").mkdir();
+            if (!outfile.exists()) outfile.mkdirs();
             ImageIO.write(img, extension, outfile);
         } catch (IOException e) {
             e.printStackTrace();
