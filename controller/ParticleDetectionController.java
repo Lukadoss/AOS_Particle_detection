@@ -1,9 +1,10 @@
 package controller;
 
-import methods.Masks;
+import methods.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -12,7 +13,8 @@ import java.util.Random;
 public class ParticleDetectionController extends Thread {
     private String extension = "png";
     private GuiController gc;
-    int size, partNum, min, max;
+    private int size, partNum, min, max;
+    private ArrayList<Double> particleRadius;
 
     ParticleDetectionController(GuiController gc, int size, int partNumber, int minPart, int maxPart) {
         this.gc = gc;
@@ -20,6 +22,7 @@ public class ParticleDetectionController extends Thread {
         this.partNum = partNumber;
         this.min = minPart;
         this.max = maxPart;
+        particleRadius = new ArrayList<>();
     }
 
     @Override
@@ -30,28 +33,28 @@ public class ParticleDetectionController extends Thread {
 
         image = generateParticles(image);
 
-        ImageController.writeImage(image, outputImageFilePath, extension);
-        gc.updateImg(outputImageFilePath);
-
-        outputImageFilePath = "img/result."+extension;
-        image = new Masks(image, 1, -1,this).getImg();
-
-
         updProg(-1);
         ImageController.writeImage(image, outputImageFilePath, extension);
-        updProg(1);
         gc.updateImg(outputImageFilePath);
+
+
+        executeMethod();
+
+//        outputImageFilePath = "img/result."+extension;
+//        image = new Masks(image, 1, -1,this).getImg();
+
+//        updProg(-1);
+//        ImageController.writeImage(image, outputImageFilePath, extension);
+//        updProg(1);
+//        gc.updateImg(outputImageFilePath);
     }
 
-    private BufferedImage executeMethod(BufferedImage image) {
-        int filter = 0, dir = -1;
-                if (gc.rbm1.isSelected()) filter = 1;
-                else if (gc.rbm2.isSelected()) filter = 2;
-                else if (gc.rbm3.isSelected()) filter = 3;
-                else if (gc.rbm4.isSelected()) filter = 4;
+    private void executeMethod() {
+                if (gc.rbm1.isSelected()) gc.updateResult(new SimpleMethod(particleRadius).getResult());
+                else if (gc.rbm2.isSelected()) gc.updateHist(new SurfaceHistogram(particleRadius).getHist());
+                else if (gc.rbm3.isSelected()) new RingDetection();
+                else if (gc.rbm4.isSelected()) new DistanceField();
 
-                image = new Masks(image, filter, dir,this).getImg();
-                return image;
     }
 
     private BufferedImage generateParticles(BufferedImage img) {
@@ -64,8 +67,9 @@ public class ParticleDetectionController extends Thread {
         g.setPaint(Color.WHITE);
         for (int i = 0; i<partNum; i++){
             Random r = new Random();
-            int particleSize = r.nextInt(max-min+1)+min;
-            g.fillOval(r.nextInt(size)-particleSize/2, r.nextInt(size)-particleSize/2, particleSize, particleSize);
+            int radius = r.nextInt(max-min+1)+min;
+            particleRadius.add(radius*0.5);
+            g.fillOval(r.nextInt(size)-radius/2, r.nextInt(size)-radius/2, radius, radius);
         }
         g.dispose();
         return img;

@@ -6,6 +6,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -14,6 +18,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
@@ -32,15 +37,15 @@ public class GuiController {
     public ProgressBar progB;
     public RadioButton rbm1, rbm2, rbm3, rbm4;
     public TextField tf1, tf2, tf3, tf4;
-    public Label wi1, wi2, wi3, wi4, progT;
+    public Label wi1, wi2, wi3, wi4, progT, resultLabel;
+    public BarChart hist;
+    public GridPane grid;
 
     private double aspectRatio = 1; // pouze ctvercove obrazky
 
-    public String filePath;
-
     @FXML
     public void initialize() {
-        if(ivIN !=null && ivOUT != null) {
+        if (ivIN != null && ivOUT != null) {
             ivIN.fitWidthProperty().bind(pnIN.widthProperty());
             ivIN.fitHeightProperty().bind(pnIN.heightProperty());
             ivOUT.fitWidthProperty().bind(pnOUT.widthProperty());
@@ -52,11 +57,13 @@ public class GuiController {
             rbm2.setToggleGroup(mgr);
             rbm3.setToggleGroup(mgr);
             rbm4.setToggleGroup(mgr);
+
+            listenSelectedRadioItem(mgr);
         }
     }
 
     public void solve(ActionEvent actionEvent) {
-        if (checkTFinput()){
+        if (checkTFinput()) {
             Thread edc = new ParticleDetectionController(this, Integer.parseInt(tf1.getText()), Integer.parseInt(tf2.getText()),
                     Integer.parseInt(tf3.getText()), Integer.parseInt(tf4.getText()));
             edc.start();
@@ -70,19 +77,25 @@ public class GuiController {
         wi3.setVisible(false);
         wi4.setVisible(false);
 
-        if (!isParsable(tf1.getText())){
+        if (!isParsable(tf1.getText())) {
             wi1.setVisible(true);
             inputs = false;
         }
-        if(!isParsable(tf2.getText())){
+        if (!isParsable(tf2.getText())) {
             wi2.setVisible(true);
             inputs = false;
         }
-        if(!isParsable(tf3.getText())){
+        if (!isParsable(tf3.getText())) {
             wi3.setVisible(true);
             inputs = false;
         }
-        if(!isParsable(tf4.getText())){
+        if (!isParsable(tf4.getText())) {
+            wi4.setText("Špatný vstup");
+            wi4.setVisible(true);
+            inputs = false;
+        }
+        if (inputs && Integer.parseInt(tf3.getText()) > Integer.parseInt(tf4.getText())) {
+            wi4.setText("Max > Min!");
             wi4.setVisible(true);
             inputs = false;
         }
@@ -95,7 +108,9 @@ public class GuiController {
             Parent root = FXMLLoader.load(getClass().getResource("../about.fxml"));
             Stage stage = new Stage();
             stage.setTitle("O programu");
-            stage.setScene(new Scene(root, 350, 125));
+            stage.setScene(new Scene(root, 600, 200));
+            stage.setMinWidth(600);
+            stage.setMinHeight(150);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -104,24 +119,25 @@ public class GuiController {
 
     private void listenResize() {
         resizeHW(pnIN, ivIN);
-        resizeHW(pnOUT, ivOUT);
+//        resizeHW(pnOUT, ivOUT);
+        resizeHist(pnOUT, hist);
     }
 
     void updateImg(String s) {
         Platform.runLater(() -> {
             if (s.contains("gray")) {
                 fitImage(ivIN, pnIN, s);
-            }else{
+            } else {
                 fitImage(ivOUT, pnOUT, s);
             }
         });
     }
 
-    void updateProgress(double val){
+    void updateProgress(double val) {
         Platform.runLater(() -> {
             if (val == -1) {
                 progT.setText("Načítání");
-            }else {
+            } else {
                 progB.setProgress(val);
                 progT.setText(Math.round(val * 100) + " %");
             }
@@ -152,7 +168,32 @@ public class GuiController {
         });
     }
 
-    private void fitImage(ImageView iv, Pane pn, String s){
+    @SuppressWarnings("Duplicates")
+    private void resizeHist(Pane tmpPN, BarChart tmpIV) {
+        tmpPN.heightProperty().addListener(observable -> {
+            double imgWidth = Math.min(tmpIV.getWidth(), tmpIV.getHeight() * aspectRatio);
+            double imgHeight = Math.min(tmpIV.getHeight(), tmpIV.getWidth() / aspectRatio);
+
+            if (rbm2.isSelected()) {
+//                tmpIV.setLayoutX(tmpPN.getWidth() / 2 - imgWidth / 2);
+                tmpIV.setLayoutY(tmpPN.getHeight() / 2 - imgHeight / 2);
+            }
+
+        });
+
+        tmpPN.widthProperty().addListener(observable -> {
+            double imgWidth = Math.min(tmpIV.getWidth(), tmpIV.getHeight() * aspectRatio);
+            double imgHeight = Math.min(tmpIV.getHeight(), tmpIV.getWidth() / aspectRatio);
+
+            if (rbm2.isSelected()) {
+//                tmpIV.setLayoutX(tmpPN.getWidth() / 2 - imgWidth / 2);
+                tmpIV.setLayoutY(tmpPN.getHeight() / 2 - imgHeight / 2);
+            }
+
+        });
+    }
+
+    private void fitImage(ImageView iv, Pane pn, String s) {
         double imgHeight = Math.min(iv.getFitHeight(), iv.getFitWidth() / aspectRatio);
         double imgWidth = Math.min(iv.getFitWidth(), iv.getFitHeight() * aspectRatio);
 
@@ -169,5 +210,31 @@ public class GuiController {
             parsable = false;
         }
         return parsable;
+    }
+
+    public void updateResult(double result) {
+        Platform.runLater(() -> resultLabel.setText("Počet nalezených stop: " + result));
+    }
+
+    public void updateHist(XYChart.Series<String, Number> data) {
+        Platform.runLater(() -> {
+                    System.out.println(data.getData());
+                    hist.getData().add(data);
+                }
+        );
+
+    }
+
+    private void listenSelectedRadioItem(ToggleGroup pgr) {
+        pgr.selectedToggleProperty().addListener(observable -> {
+            if (rbm2.isSelected()) {
+                hist.setVisible(true);
+                hist.setData(null);
+                grid.setColumnSpan(pnIN, 1);
+            } else {
+                hist.setVisible(false);
+                grid.setColumnSpan(pnIN, 2);
+            }
+        });
     }
 }
