@@ -1,5 +1,7 @@
 package controller;
 
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
 import methods.*;
 
 import java.awt.*;
@@ -15,6 +17,14 @@ public class ParticleDetectionController extends Thread {
     private GuiController gc;
     private int size, partNum, min, max;
     private ArrayList<Double> particleRadius;
+    private BufferedImage image;
+
+    ParticleDetectionController(GuiController gc, Image img, String ext){
+        this.gc = gc;
+        this.extension = ext;
+        this.image = SwingFXUtils.fromFXImage(img, this.image);
+        particleRadius = new ArrayList<>();
+    }
 
     ParticleDetectionController(GuiController gc, int size, int partNumber, int minPart, int maxPart) {
         this.gc = gc;
@@ -27,18 +37,22 @@ public class ParticleDetectionController extends Thread {
 
     @Override
     public void run(){
-        String outputImageFilePath = "img/gray."+extension;
+        String outputImageFilePath = "img/result." + extension;
+        String test = "img/test." + extension;
+        if (this.size != 0) {
+            image = new BufferedImage(size, size, BufferedImage.TYPE_3BYTE_BGR);
 
-        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_BYTE_GRAY);
+            generateParticles(image);
 
-        image = generateParticles(image);
+            updProg(-1);
+            ImageController.writeImage(image, outputImageFilePath, extension);
+            updProg(1);
+            gc.updateImg(outputImageFilePath);
+        }
 
-        updProg(-1);
-        ImageController.writeImage(image, outputImageFilePath, extension);
-        gc.updateImg(outputImageFilePath);
-
-
-        executeMethod();
+        seedAlgorithm(image);
+        ImageController.writeImage(image, test, extension);
+        gc.updateImg(test);
 
 //        outputImageFilePath = "img/result."+extension;
 //        image = new Masks(image, 1, -1,this).getImg();
@@ -49,12 +63,27 @@ public class ParticleDetectionController extends Thread {
 //        gc.updateImg(outputImageFilePath);
     }
 
-    private void executeMethod() {
+    /**
+     * Algoritmus pro nalezení všech částic na snímku a výpočet jejich obsahu/obvodu.
+     */
+    private void seedAlgorithm(BufferedImage img) {
+        for (int i = 0; i < img.getWidth(); i++) {
+            for (int j = 0; j < img.getHeight(); j++) {
+                int val = img.getRGB(i, j);
+                if(val>new Color(128,128,128).getRGB()){
+                    img.setRGB(i, j, new Color(255, 0,0).getRGB());
+                }
+            }
+            double prog = i/(double)img.getWidth();
+            updProg(prog);
+        }
+    }
+
+    public void executeMethod() {
                 if (gc.rbm1.isSelected()) gc.updateResult(new SimpleMethod(particleRadius).getResult());
                 else if (gc.rbm2.isSelected()) gc.updateHist(new SurfaceHistogram(particleRadius).getHist());
                 else if (gc.rbm3.isSelected()) new RingDetection();
                 else if (gc.rbm4.isSelected()) new DistanceField();
-
     }
 
     private BufferedImage generateParticles(BufferedImage img) {
@@ -68,7 +97,6 @@ public class ParticleDetectionController extends Thread {
         for (int i = 0; i<partNum; i++){
             Random r = new Random();
             int radius = r.nextInt(max-min+1)+min;
-            particleRadius.add(radius*0.5);
             g.fillOval(r.nextInt(size)-radius/2, r.nextInt(size)-radius/2, radius, radius);
         }
         g.dispose();

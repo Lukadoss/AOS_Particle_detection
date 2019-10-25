@@ -12,7 +12,6 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -21,7 +20,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="mainStage" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="200.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.GuiController">
+<BorderPane fx:id="mainStage" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="200.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.999-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.GuiController">
     <children>
         <BorderPane prefHeight="377.0" prefWidth="450.0" />
     </children>
@@ -29,30 +28,15 @@
       <GridPane fx:id="grid" alignment="CENTER" style="-fx-background-color: darkgray;" BorderPane.alignment="CENTER">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         </columnConstraints>
         <rowConstraints>
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-               <Pane fx:id="pnIN" GridPane.columnSpan="2">
+               <Pane fx:id="pnIN">
                    <ImageView fx:id="ivIN" pickOnBounds="true" preserveRatio="true">
                    </ImageView>
                </Pane>
-            <Pane fx:id="pnOUT" GridPane.columnIndex="1">
-               <children>
-                  <ImageView fx:id="ivOUT" pickOnBounds="true" preserveRatio="true">
-                  </ImageView>
-                  <BarChart fx:id="hist" title="Histogram stop" visible="false">
-                    <xAxis>
-                      <CategoryAxis side="BOTTOM" />
-                    </xAxis>
-                    <yAxis>
-                      <NumberAxis side="LEFT" />
-                    </yAxis>
-                  </BarChart>
-               </children>
-            </Pane>
          </children>
       </GridPane>
    </center>
@@ -81,6 +65,9 @@
                            <padding>
                               <Insets top="-20.0" />
                            </padding>
+                           <font>
+                              <Font name="Noto Sans Regular" size="13.0" />
+                           </font>
                         </Label>
                      </children>
                   </VBox>
@@ -92,25 +79,49 @@
                <children>
                   <Label text="Nový snímek">
                      <font>
-                        <Font name="System Bold" size="16.0" />
+                        <Font name="Noto Sans Bold" size="16.0" />
                      </font>
                   </Label>
                   <Label text="Velikost snímku (px)">
                      <VBox.margin>
                         <Insets top="10.0" />
-                     </VBox.margin></Label>
+                     </VBox.margin>
+                     <font>
+                        <Font name="Noto Sans Regular" size="13.0" />
+                     </font></Label>
                   <TextField fx:id="tf1" text="512" />
-                  <Label fx:id="wi1" layoutX="57.0" layoutY="55.0" text="Špatný vstup" textFill="RED" visible="false" />
-                  <Label layoutX="96.0" layoutY="20.0" text="Počet částic" />
+                  <Label fx:id="wi1" layoutX="57.0" layoutY="55.0" text="Špatný vstup" textFill="RED" visible="false">
+                     <font>
+                        <Font name="Noto Sans Regular" size="13.0" />
+                     </font></Label>
+                  <Label layoutX="96.0" layoutY="20.0" text="Počet částic">
+                     <font>
+                        <Font name="Noto Sans Regular" size="13.0" />
+                     </font></Label>
                   <TextField fx:id="tf2" text="100" />
-                  <Label fx:id="wi2" layoutX="76.0" layoutY="97.0" text="Špatný vstup" textFill="RED" visible="false" />
-                  <Label text="Min. průměr částic (px)" />
+                  <Label fx:id="wi2" layoutX="76.0" layoutY="97.0" text="Špatný vstup" textFill="RED" visible="false">
+                     <font>
+                        <Font name="Noto Sans Regular" size="13.0" />
+                     </font></Label>
+                  <Label text="Min. průměr částic (px)">
+                     <font>
+                        <Font name="Noto Sans Regular" size="13.0" />
+                     </font></Label>
                   <TextField fx:id="tf3" text="10" />
-                  <Label fx:id="wi3" layoutX="76.0" layoutY="156.0" text="Špatný vstup" textFill="RED" visible="false" />
-                  <Label text="Max. průměr částic (px)" />
+                  <Label fx:id="wi3" layoutX="76.0" layoutY="156.0" text="Špatný vstup" textFill="RED" visible="false">
+                     <font>
+                        <Font name="Noto Sans Regular" size="13.0" />
+                     </font></Label>
+                  <Label text="Max. průměr částic (px)">
+                     <font>
+                        <Font name="Noto Sans Regular" size="13.0" />
+                     </font></Label>
                   <TextField fx:id="tf4" text="20" />
-                  <Label fx:id="wi4" layoutX="76.0" layoutY="215.0" text="Špatný vstup" textFill="RED" visible="false" />
-                    <Button fx:id="solve" alignment="CENTER" contentDisplay="CENTER" defaultButton="true" minWidth="60.0" mnemonicParsing="false" onAction="#solve" pickOnBounds="false" text="Generovat" textAlignment="CENTER">
+                  <Label fx:id="wi4" layoutX="76.0" layoutY="215.0" text="Špatný vstup" textFill="RED" visible="false">
+                     <font>
+                        <Font name="Noto Sans Regular" size="13.0" />
+                     </font></Label>
+                    <Button fx:id="generate" alignment="CENTER" contentDisplay="CENTER" defaultButton="true" minWidth="60.0" mnemonicParsing="false" onAction="#generate" pickOnBounds="false" text="Generovat" textAlignment="CENTER">
                         <opaqueInsets>
                             <Insets />
                         </opaqueInsets>
@@ -118,15 +129,47 @@
                             <Cursor fx:constant="HAND" />
                         </cursor>
                      <VBox.margin>
-                        <Insets bottom="5.0" top="10.0" />
+                        <Insets top="10.0" />
                      </VBox.margin>
                      <padding>
                         <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                      </padding>
                      <font>
-                        <Font name="System Bold" size="14.0" />
+                        <Font name="Noto Sans Bold" size="14.0" />
                      </font>
                     </Button>
+                  <Separator>
+                     <VBox.margin>
+                        <Insets top="20.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="-10.0" left="-10.0" right="-10.0" top="-10.0" />
+                     </padding>
+                  </Separator>
+                  <Label layoutX="58.0" layoutY="20.0" text="Načíst snímek">
+                     <font>
+                        <Font name="Noto Sans Bold" size="16.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </Label>
+                  <Button fx:id="picBut" alignment="CENTER" contentDisplay="CENTER" minWidth="100.0" mnemonicParsing="false" onAction="#openFile" text="Vyber obrázek..." textAlignment="CENTER">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                     <font>
+                        <Font name="Noto Sans Regular" size="13.0" />
+                     </font>
+                  </Button>
+                  <Label fx:id="picWarning" text="Nejdřív vyber obrázek!" textFill="RED" visible="false">
+                     <font>
+                        <Font name="Noto Sans Regular" size="13.0" />
+                     </font>
+                  </Label>
                   <Separator>
                      <VBox.margin>
                         <Insets top="5.0" />
@@ -135,6 +178,22 @@
                         <Insets bottom="-10.0" left="-10.0" right="-10.0" top="-10.0" />
                      </padding>
                   </Separator>
+                  <Label alignment="TOP_CENTER" contentDisplay="CENTER" text="Výsledky" textAlignment="CENTER">
+                     <font>
+                        <Font name="Noto Sans Bold" size="16.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </Label>
+                  <Label fx:id="resultLabel" alignment="CENTER" contentDisplay="CENTER" ellipsisString="" text="Počet nalezených stop: " textAlignment="CENTER" textOverrun="CLIP" wrapText="true">
+                     <font>
+                        <Font name="Noto Sans Regular" size="14.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </Label>
                </children>
                <BorderPane.margin>
                   <Insets />
@@ -144,66 +203,90 @@
                </padding>
             </VBox>
          </top>
-         <center>
+      </BorderPane>
+   </left>
+   <right>
+      <BorderPane prefWidth="200.0" BorderPane.alignment="CENTER">
+         <top>
             <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
                <children>
                   <Label alignment="TOP_CENTER" contentDisplay="CENTER" text="Metody">
                      <font>
-                        <Font name="System Bold" size="16.0" />
+                        <Font name="Noto Sans Bold" size="16.0" />
                      </font>
                   </Label>
-                  <AnchorPane>
+                  <VBox prefWidth="200.0">
                      <children>
-                        <VBox prefWidth="200.0">
-                           <children>
-                              <RadioButton fx:id="rbm1" contentDisplay="CENTER" mnemonicParsing="false" selected="true" text="Prostá metoda">
-                                 <VBox.margin>
-                                    <Insets />
-                                 </VBox.margin>
-                              </RadioButton>
-                              <RadioButton fx:id="rbm2" contentDisplay="CENTER" mnemonicParsing="false" text="Histogram plochy">
-                                 <VBox.margin>
-                                    <Insets top="10.0" />
-                                 </VBox.margin>
-                              </RadioButton>
-                              <RadioButton fx:id="rbm3" contentDisplay="CENTER" mnemonicParsing="false" text="Kruhová stopa" wrapText="true">
-                                 <VBox.margin>
-                                    <Insets top="10.0" />
-                                 </VBox.margin>
-                              </RadioButton>
-                              <RadioButton fx:id="rbm4" contentDisplay="CENTER" mnemonicParsing="false" text="Vzdálenostní metoda">
-                                 <VBox.margin>
-                                    <Insets top="10.0" />
-                                 </VBox.margin>
-                              </RadioButton>
-                           </children>
-                           <padding>
-                              <Insets left="20.0" top="10.0" />
-                           </padding>
-                        </VBox>
+                        <RadioButton fx:id="rbm1" contentDisplay="CENTER" mnemonicParsing="false" selected="true" text="Prostá metoda">
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
+                           <font>
+                              <Font name="Noto Sans Regular" size="13.0" />
+                           </font>
+                        </RadioButton>
+                        <RadioButton fx:id="rbm2" contentDisplay="CENTER" mnemonicParsing="false" text="Histogram plochy">
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                        </RadioButton>
+                        <RadioButton fx:id="rbm3" contentDisplay="CENTER" mnemonicParsing="false" text="Kruhová stopa" wrapText="true">
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                           <font>
+                              <Font name="Noto Sans Regular" size="13.0" />
+                           </font>
+                        </RadioButton>
+                        <RadioButton fx:id="rbm4" contentDisplay="CENTER" mnemonicParsing="false" text="Vzdálenostní metoda">
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                           <font>
+                              <Font name="Noto Sans Regular" size="13.0" />
+                            </font>
+                        </RadioButton>
                      </children>
-                  </AnchorPane>
+                     <padding>
+                        <Insets left="20.0" top="10.0" />
+                     </padding>
+                  </VBox>
+      
+                  <Button fx:id="solve" alignment="CENTER" contentDisplay="CENTER" defaultButton="true" disable="true" minWidth="60.0" mnemonicParsing="false" onAction="#solve" pickOnBounds="false" text="Magie" textAlignment="CENTER">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                     </padding>
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Button>
                   <Separator prefWidth="200.0">
                      <VBox.margin>
                         <Insets top="10.0" />
                      </VBox.margin>
                   </Separator>
-                  <Label alignment="TOP_CENTER" contentDisplay="CENTER" text="Výsledky" textAlignment="CENTER">
-                     <font>
-                        <Font name="System Bold" size="16.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets top="10.0" />
-                     </VBox.margin>
-                  </Label>
-                  <Label fx:id="resultLabel" alignment="CENTER" contentDisplay="CENTER" text="Počet nalezených stop: " textAlignment="CENTER" wrapText="true">
-                     <font>
-                        <Font size="14.0" />
-                     </font>
-                  </Label>
                </children>
             </VBox>
+         </top>
+         <center>
+            <BarChart fx:id="hist" title="Cetnost viceexpozic" visible="false" BorderPane.alignment="CENTER">
+              <xAxis>
+                <CategoryAxis side="BOTTOM" />
+              </xAxis>
+              <yAxis>
+                <NumberAxis side="LEFT" />
+              </yAxis>
+            </BarChart>
          </center>
       </BorderPane>
-   </left>
+   </right>
 </BorderPane>
