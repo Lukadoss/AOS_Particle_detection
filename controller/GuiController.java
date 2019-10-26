@@ -1,6 +1,7 @@
 package controller;
 
 import javafx.application.Platform;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -38,9 +39,8 @@ public class GuiController {
     public BarChart hist;
     public GridPane grid;
 
-    private Image img;
     private ParticleDetectionController edc;
-    private String ext;
+    private String ext, filePath;
     private double aspectRatio = 1; // pouze ctvercove obrazky
 
     @FXML
@@ -137,14 +137,15 @@ public class GuiController {
         File file = fileChooser.showOpenDialog(stage);
         if (file != null) {
             picWarning.setVisible(false);
-            img = new Image(file.toURI().toString());
+            Image img = new Image(file.toURI().toString());
+            filePath = file.getPath();
 
             ivIN.setImage(img);
             progB.setProgress(0);
             progT.setText("");
 
             aspectRatio = img.getWidth() / img.getHeight();
-            fitImage(ivIN, pnIN, file.getPath());
+            fitImage(ivIN, pnIN, filePath);
 
             picBut.setText(file.getName());
             ext = picBut.getText().substring(picBut.getText().lastIndexOf(".") + 1);
@@ -267,7 +268,7 @@ public class GuiController {
                     Integer.parseInt(tf3.getText()), Integer.parseInt(tf4.getText()));
             edc.start();
         } else {
-            edc = new ParticleDetectionController(this, img, ext);
+            edc = new ParticleDetectionController(this, filePath, ext);
             edc.start();
         }
         solve.setDisable(false);

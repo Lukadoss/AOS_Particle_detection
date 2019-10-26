@@ -1,13 +1,12 @@
 package controller;
 
-import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.image.Image;
 import methods.*;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Stack;
 
 /**
  * Created by Lukado on 23. 11. 2016.
@@ -19,11 +18,10 @@ public class ParticleDetectionController extends Thread {
     private ArrayList<Double> particleRadius;
     private BufferedImage image;
 
-    ParticleDetectionController(GuiController gc, Image img, String ext){
-        this.gc = gc;
+    ParticleDetectionController(GuiController gc, String fileLoc, String ext) {
+        this(gc, 0, 0, 0, 0);
         this.extension = ext;
-        this.image = SwingFXUtils.fromFXImage(img, this.image);
-        particleRadius = new ArrayList<>();
+        this.image = ImageController.readImage(fileLoc);
     }
 
     ParticleDetectionController(GuiController gc, int size, int partNumber, int minPart, int maxPart) {
@@ -36,7 +34,7 @@ public class ParticleDetectionController extends Thread {
     }
 
     @Override
-    public void run(){
+    public void run() {
         String outputImageFilePath = "img/result." + extension;
         String test = "img/test." + extension;
         if (this.size != 0) {
@@ -53,6 +51,7 @@ public class ParticleDetectionController extends Thread {
         seedAlgorithm(image);
         ImageController.writeImage(image, test, extension);
         gc.updateImg(test);
+        gc.updateResult(particleRadius.size());
 
 //        outputImageFilePath = "img/result."+extension;
 //        image = new Masks(image, 1, -1,this).getImg();
@@ -67,37 +66,73 @@ public class ParticleDetectionController extends Thread {
      * Algoritmus pro nalezení všech částic na snímku a výpočet jejich obsahu/obvodu.
      */
     private void seedAlgorithm(BufferedImage img) {
+        Stack<Point> s = new Stack<>();
+        double particleContent = 0;
+
         for (int i = 0; i < img.getWidth(); i++) {
             for (int j = 0; j < img.getHeight(); j++) {
                 int val = img.getRGB(i, j);
-                if(val>new Color(128,128,128).getRGB()){
-                    img.setRGB(i, j, new Color(255, 0,0).getRGB());
+                if (val == Color.WHITE.getRGB()) {
+                    particleContent++;
+                    img.setRGB(i, j, Color.RED.getRGB());
+                    // 4okoli-8okoli do zasobniku
+                    check8d(s, img, i, j);
+
+                    while (!s.empty()) {
+                        Point p = s.pop();
+                        if (img.getRGB(p.x, p.y) == Color.RED.getRGB()) continue;
+                        particleContent++;
+                        img.setRGB(p.x, p.y, Color.RED.getRGB());
+                        check8d(s, img, p.x, p.y);
+                    }
+
+                    Graphics2D g = (Graphics2D) img.getGraphics();
+                    g.setFont(new Font("Serif", Font.PLAIN, 10));
+                    g.setColor(Color.CYAN);
+                    g.drawString(particleContent + "", i, j);
+                    g.dispose();
+
+                    particleRadius.add(particleContent);
+                    particleContent=0;
                 }
             }
-            double prog = i/(double)img.getWidth();
+
+            double prog = i / (double) img.getWidth();
             updProg(prog);
         }
     }
 
+    private void check8d(Stack<Point> s, BufferedImage img, int x, int y) {
+        for (int i = -1; i <= 1; i++) {
+            if ((x+i)<0 || (x+i)>img.getWidth()-1) continue;
+            for (int j = -1; j <= 1; j++) {
+                if((y+j)<0 || (y+j)>img.getHeight()-1) continue;
+
+                int val = img.getRGB(x + i, y + j);
+                if (!(i == 0 && j == 0) && val == Color.WHITE.getRGB()) {
+                    s.push(new Point(x + i, y + j));
+                }
+            }
+        }
+    }
+
     public void executeMethod() {
-                if (gc.rbm1.isSelected()) gc.updateResult(new SimpleMethod(particleRadius).getResult());
-                else if (gc.rbm2.isSelected()) gc.updateHist(new SurfaceHistogram(particleRadius).getHist());
-                else if (gc.rbm3.isSelected()) new RingDetection();
-                else if (gc.rbm4.isSelected()) new DistanceField();
+        if (gc.rbm1.isSelected()) gc.updateResult(new SimpleMethod(particleRadius).getResult());
+        else if (gc.rbm2.isSelected()) gc.updateHist(new SurfaceHistogram(particleRadius).getHist());
+        else if (gc.rbm3.isSelected()) new RingDetection();
+        else if (gc.rbm4.isSelected()) new DistanceField();
     }
 
     private BufferedImage generateParticles(BufferedImage img) {
         Graphics2D g = (Graphics2D) img.getGraphics();
         g.setColor(Color.BLACK);
-        g.setRenderingHint (RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint (RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g.fillRect(0, 0, img.getWidth(), img.getHeight());
 
         g.setPaint(Color.WHITE);
-        for (int i = 0; i<partNum; i++){
+        for (int i = 0; i < partNum; i++) {
             Random r = new Random();
-            int radius = r.nextInt(max-min+1)+min;
-            g.fillOval(r.nextInt(size)-radius/2, r.nextInt(size)-radius/2, radius, radius);
+            int radius = r.nextInt(max - min + 1) + min;
+            g.fillOval(r.nextInt(size) - radius / 2, r.nextInt(size) - radius / 2, radius, radius);
         }
         g.dispose();
         return img;
@@ -106,4 +141,5 @@ public class ParticleDetectionController extends Thread {
     public void updProg(double value) {
         gc.updateProgress(value);
     }
+
 }
