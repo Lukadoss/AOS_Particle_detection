@@ -53,6 +53,7 @@ public class ParticleDetectionController extends Thread {
         gc.updateImg(test);
         gc.updateResult(particleRadius.size());
 
+        executeMethod();
 //        outputImageFilePath = "img/result."+extension;
 //        image = new Masks(image, 1, -1,this).getImg();
 
@@ -117,7 +118,13 @@ public class ParticleDetectionController extends Thread {
     }
 
     public void executeMethod() {
-        if (gc.rbm1.isSelected()) gc.updateResult(new SimpleMethod(particleRadius).getResult());
+        if (gc.rbm1.isSelected()) {
+            SimpleMethod sm = new SimpleMethod(particleRadius);
+            if (gc.rbp1.isSelected()) sm.doMean();
+            else if (gc.rbp2.isSelected()) sm.doMedian();
+            else if (gc.rbp3.isSelected()) sm.doMidRange();
+            gc.updateResult(sm.getResult());
+        }
         else if (gc.rbm2.isSelected()) gc.updateHist(new SurfaceHistogram(particleRadius).getHist());
         else if (gc.rbm3.isSelected()) new RingDetection();
         else if (gc.rbm4.isSelected()) new DistanceField();
