@@ -6,7 +6,9 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableListBase;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Side;
@@ -22,6 +24,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -45,6 +49,7 @@ public class GuiController {
     public BarChart<Number, String> histogram;
     public GridPane grid;
     public VBox simpleVB, histSettings;
+    public Slider histSlider;
 
     private ParticleDetectionController pdc;
     private String ext, filePath;
@@ -65,18 +70,51 @@ public class GuiController {
     private void initHistogram() {
         final NumberAxis xAxis = new NumberAxis();
         final CategoryAxis yAxis = new CategoryAxis();
+        xAxis.setLabel("Obsahy (S)");
+        yAxis.setLabel("Četnost obsahů (N)");
+
         histogram = new BarChart<>(xAxis, yAxis);
         histogram.setPrefSize(200, Region.USE_COMPUTED_SIZE);
         histogram.setLayoutY(60);
         histogram.setLegendVisible(false);
-
-        xAxis.setLabel("Obsahy (S)");
-        yAxis.setLabel("Četnost obsahů (N)");
         histogram.setTitle("Četnost víceexpozic");
         histogram.setStyle("-fx-font-family: 'Noto Sans'");
+        histogram.setDisable(true);
+        histogram.setAnimated(false);
 
+        histSettings.getChildren().add(1, histogram);
 
-        histSettings.getChildren().add(histogram);
+        histSlider.valueProperty().addListener((obs, oldval, newVal) ->
+        {
+            if (!histSlider.isValueChanging()) {
+                if (newVal.intValue()==0) histSlider.setValue(oldval.doubleValue());
+                pdc.executeMethod();
+            }
+        });
+
+        final double SCALE_DELTA = 1.1;
+        histogram.setOnScroll(event -> {
+            event.consume();
+
+            if (event.getDeltaY() == 0) {
+                return;
+            }
+
+            double scaleFactor = (event.getDeltaY() > 0) ? SCALE_DELTA : 1 / SCALE_DELTA;
+            xAxis.setAutoRanging(false);
+            xAxis.setLowerBound(0);
+            xAxis.setUpperBound(xAxis.getUpperBound() * scaleFactor);
+            xAxis.setTickUnit(xAxis.getUpperBound() / 20);
+//                histogramChart.setScaleY(histogramChart.getScaleY() * scaleFactor);
+
+        });
+
+        histogram.setOnMousePressed(event -> {
+            if (event.getClickCount() == 2) {
+                xAxis.setAutoRanging(true);
+//                    histogramChart.setScaleX(1.0);
+            }
+        });
     }
 
     private void initRadioButtons() {
@@ -94,7 +132,6 @@ public class GuiController {
         rbp3.setToggleGroup(pgr);
 
         listenSelectedSettings(pgr);
-
 
         final ToggleGroup pgh = new ToggleGroup(); // hist method group
         rbh1.setToggleGroup(pgh);
@@ -282,8 +319,28 @@ public class GuiController {
         Platform.runLater(() -> resultLabel.setText("Počet nalezených stop: " + result));
     }
 
-    public void updateHist(XYChart.Series<Number, String> data) {
-        Platform.runLater(() -> histogram.setData(FXCollections.observableArrayList(data)));
+    public void updateHist(XYChart.Series<Number, String> data, int maxSize) {
+        Platform.runLater(() -> {
+            histSlider.setDisable(false);
+            histogram.setDisable(false);
+            histogram.setData(FXCollections.observableArrayList(data));
+
+            for (XYChart.Series<Number, String> serie: histogram.getData()){
+                for (XYChart.Data<Number, String> item: serie.getData()){
+                    item.getNode().setOnMousePressed((MouseEvent event) -> {
+                        System.out.println("you clicked "+item.getYValue());
+                    });
+                }
+            }
+
+            if (histSlider.getMax()!=maxSize) {
+                histSlider.setMax(maxSize);
+                histSlider.setValue(maxSize * 0.1);
+                histSlider.setBlockIncrement(maxSize / 100.0);
+                histSlider.setMajorTickUnit(maxSize / 10.0);
+                histSlider.setMinorTickCount((int) (maxSize / 10.0) / 2);
+            }
+        });
     }
 
     private void listenSelectedMethod(ToggleGroup tg) {

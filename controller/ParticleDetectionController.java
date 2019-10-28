@@ -125,7 +125,10 @@ public class ParticleDetectionController extends Thread {
             else if (gc.rbp3.isSelected()) sm.doMidRange();
             gc.updateResult(sm.getResult());
         }
-        else if (gc.rbm2.isSelected()) gc.updateHist(new SurfaceHistogram(particleRadius).getHist());
+        else if (gc.rbm2.isSelected()){
+            SurfaceHistogram sh = new SurfaceHistogram(particleRadius, gc.histSlider.getValue());
+            gc.updateHist(sh.getHist(), particleRadius.size());
+        }
         else if (gc.rbm3.isSelected()) new RingDetection();
         else if (gc.rbm4.isSelected()) new DistanceField();
     }
