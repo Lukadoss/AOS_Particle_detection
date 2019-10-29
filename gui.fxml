@@ -335,7 +335,7 @@
                               <Insets left="20.0" top="10.0" />
                            </padding>
                         </VBox>
-                        <Slider fx:id="histSlider" blockIncrement="1.0" disable="true" majorTickUnit="10.0" max="0.0" minorTickCount="5" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="10.0">
+                        <Slider fx:id="histSlider" blockIncrement="1.0" majorTickUnit="10.0" max="0.0" minorTickCount="5" showTickLabels="true" showTickMarks="true" snapToTicks="true" value="10.0">
                            <VBox.margin>
                               <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
                            </VBox.margin>
@@ -345,6 +345,12 @@
                </children>
             </AnchorPane>
          </center>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
+         <padding>
+            <Insets top="10.0" />
+         </padding>
       </BorderPane>
    </right>
 </BorderPane>

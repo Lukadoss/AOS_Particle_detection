@@ -6,12 +6,9 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableListBase;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Side;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.BarChart;
@@ -19,13 +16,9 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -70,24 +63,23 @@ public class GuiController {
     private void initHistogram() {
         final NumberAxis xAxis = new NumberAxis();
         final CategoryAxis yAxis = new CategoryAxis();
-        xAxis.setLabel("Obsahy (S)");
-        yAxis.setLabel("Četnost obsahů (N)");
+        xAxis.setLabel("Četnost obsahů (N)");
+        yAxis.setLabel("Obsahy (S)");
 
+        histSettings.setDisable(true);
         histogram = new BarChart<>(xAxis, yAxis);
         histogram.setPrefSize(200, Region.USE_COMPUTED_SIZE);
         histogram.setLayoutY(60);
         histogram.setLegendVisible(false);
         histogram.setTitle("Četnost víceexpozic");
         histogram.setStyle("-fx-font-family: 'Noto Sans'");
-        histogram.setDisable(true);
         histogram.setAnimated(false);
-
         histSettings.getChildren().add(1, histogram);
 
         histSlider.valueProperty().addListener((obs, oldval, newVal) ->
         {
             if (!histSlider.isValueChanging()) {
-                if (newVal.intValue()==0) histSlider.setValue(oldval.doubleValue());
+                if (newVal.intValue() == 0) histSlider.setValue(oldval.doubleValue());
                 pdc.executeMethod();
             }
         });
@@ -315,30 +307,35 @@ public class GuiController {
         return parsable;
     }
 
-    public void updateResult(double result) {
-        Platform.runLater(() -> resultLabel.setText("Počet nalezených stop: " + result));
+    public void updateResult(String result) {
+        Platform.runLater(() -> resultLabel.setText(result));
     }
 
-    public void updateHist(XYChart.Series<Number, String> data, int maxSize) {
+    public void updateHist(XYChart.Series<Number, String> data) {
         Platform.runLater(() -> {
-            histSlider.setDisable(false);
-            histogram.setDisable(false);
-            histogram.setData(FXCollections.observableArrayList(data));
+            boolean flag = true;
+            histSettings.setDisable(false);
+            histogram.setData(FXCollections.observableArrayList(data)) ;
 
-            for (XYChart.Series<Number, String> serie: histogram.getData()){
-                for (XYChart.Data<Number, String> item: serie.getData()){
+            for (XYChart.Series<Number, String> serie : histogram.getData()) {
+                for (XYChart.Data<Number, String> item : serie.getData()) {
+                    if (item.getXValue().intValue()==pdc.getSH().getRefValue() && flag){
+                        item.getNode().setStyle("-fx-bar-fill: green");
+                        flag = false;
+                    }
                     item.getNode().setOnMousePressed((MouseEvent event) -> {
-                        System.out.println("you clicked "+item.getYValue());
+                        for (XYChart.Series<Number, String> s : histogram.getData()) {
+                            for (XYChart.Data<Number, String> i : serie.getData()) {
+                                i.getNode().setStyle("-fx-bar-fill: red;");
+                            }
+                        }
+                        item.getNode().setStyle("-fx-bar-fill: green");
+                        pdc.getSH().setRefValue(item);
+                        pdc.getSH().calculateExpo();
+                        updateHist(pdc.getSH().getHist());
+                        updateResult("Počet nalezených stop: "+pdc.getSH().getResult());
                     });
                 }
-            }
-
-            if (histSlider.getMax()!=maxSize) {
-                histSlider.setMax(maxSize);
-                histSlider.setValue(maxSize * 0.1);
-                histSlider.setBlockIncrement(maxSize / 100.0);
-                histSlider.setMajorTickUnit(maxSize / 10.0);
-                histSlider.setMinorTickCount((int) (maxSize / 10.0) / 2);
             }
         });
     }
@@ -350,7 +347,7 @@ public class GuiController {
             animateHist(200);
             rbh1.setSelected(true);
 
-            if (ivIN.getImage()!=null) pdc.executeMethod();
+            if (ivIN.getImage() != null) pdc.executeMethod();
 
             switch (((RadioButton) tg.getSelectedToggle()).getId()) {
                 case "rbm1":
