@@ -36,14 +36,16 @@ public class GuiController {
     public ImageView ivIN;
     public Pane pnIN;
     public ProgressBar progB;
-    public RadioButton rbm1, rbm2, rbm3, rbm4, rbp1, rbp2, rbp3, rbh1, rbh2;
+    public RadioButton rbm1, rbm2, rbm3, rbm4, rbp1, rbp2, rbp3, rbh1, rbh2, rbd1, rbd2;
     public TextField tf1, tf2, tf3, tf4;
     public Label wi1, wi2, wi3, wi4, progT, resultLabel, picWarning;
     public BarChart<Number, String> histogram;
     public GridPane grid;
-    public VBox simpleVB, histSettings;
+    public VBox simpleVB, histVB, ringVB, distanceVB;
     public Slider histSlider;
 
+    public boolean debugMode = true;
+    public CheckBox debugCheckBox;
     private ParticleDetectionController pdc;
     private String ext, filePath;
     private double aspectRatio = 1; // pouze ctvercove obrazky
@@ -66,7 +68,7 @@ public class GuiController {
         xAxis.setLabel("Četnost obsahů (N)");
         yAxis.setLabel("Obsahy (S)");
 
-        histSettings.setDisable(true);
+        histVB.setDisable(true);
         histogram = new BarChart<>(xAxis, yAxis);
         histogram.setPrefSize(200, Region.USE_COMPUTED_SIZE);
         histogram.setLayoutY(60);
@@ -74,7 +76,7 @@ public class GuiController {
         histogram.setTitle("Četnost víceexpozic");
         histogram.setStyle("-fx-font-family: 'Noto Sans'");
         histogram.setAnimated(false);
-        histSettings.getChildren().add(1, histogram);
+        histVB.getChildren().add(1, histogram);
 
         histSlider.valueProperty().addListener((obs, oldval, newVal) ->
         {
@@ -107,6 +109,10 @@ public class GuiController {
 //                    histogramChart.setScaleX(1.0);
             }
         });
+
+        histogram.setOnKeyPressed(event->{
+            System.out.println(event.getCode());
+        });
     }
 
     private void initRadioButtons() {
@@ -130,6 +136,12 @@ public class GuiController {
         rbh2.setToggleGroup(pgh);
 
         listenSelectedSettings(pgh);
+
+        final ToggleGroup pgd = new ToggleGroup(); // hist method group
+        rbd1.setToggleGroup(pgd);
+        rbd2.setToggleGroup(pgd);
+
+        listenSelectedSettings(pgd);
     }
 
     public void solve(ActionEvent actionEvent) {
@@ -314,7 +326,7 @@ public class GuiController {
     public void updateHist(XYChart.Series<Number, String> data) {
         Platform.runLater(() -> {
             boolean flag = true;
-            histSettings.setDisable(false);
+            histVB.setDisable(false);
             histogram.setData(FXCollections.observableArrayList(data)) ;
 
             for (XYChart.Series<Number, String> serie : histogram.getData()) {
@@ -343,7 +355,9 @@ public class GuiController {
     private void listenSelectedMethod(ToggleGroup tg) {
         tg.selectedToggleProperty().addListener(observable -> {
             simpleVB.setVisible(false);
-            histSettings.setVisible(false);
+            histVB.setVisible(false);
+            ringVB.setVisible(false);
+            distanceVB.setVisible(false);
             animateHist(200);
             rbh1.setSelected(true);
 
@@ -354,8 +368,13 @@ public class GuiController {
                     simpleVB.setVisible(true);
                     break;
                 case "rbm2":
-                    histSettings.setVisible(true);
+                    histVB.setVisible(true);
                     break;
+                case "rbm3":
+                    ringVB.setVisible(true);
+                    break;
+                case "rbm4":
+                    distanceVB.setVisible(true);
             }
         });
     }
@@ -366,6 +385,8 @@ public class GuiController {
                 case "rbp1":
                 case "rbp2":
                 case "rbp3":
+                case "rbd1":
+                case "rbd2":
                     if (ivIN.getImage() != null) pdc.executeMethod();
                     break;
                 case "rbh1":
@@ -404,5 +425,13 @@ public class GuiController {
             pdc.start();
         }
         solve.setDisable(false);
+    }
+
+    public void setDebug(ActionEvent actionEvent) {
+        if (debugCheckBox.isSelected()){
+            debugMode = true;
+        }else{
+            debugMode = false;
+        }
     }
 }

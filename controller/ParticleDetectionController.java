@@ -1,11 +1,11 @@
 package controller;
 
 import methods.*;
-import sun.java2d.Surface;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.Stack;
 
@@ -14,9 +14,13 @@ import java.util.Stack;
  */
 public class ParticleDetectionController extends Thread {
     private String extension = "png";
+    private String outputImageFilePath = "img/result." + extension;
+    private String inputImageFilePath = "img/input." + extension;
+
     private GuiController gc;
     private int size, partNum, min, max;
-    private ArrayList<Double> particleRadius;
+    private ArrayList<Double> particleVolume;
+    private ArrayList<Double> particlePeriphery;
     private BufferedImage image;
     private SurfaceHistogram sh;
 
@@ -32,14 +36,12 @@ public class ParticleDetectionController extends Thread {
         this.partNum = partNumber;
         this.min = minPart;
         this.max = maxPart;
-        particleRadius = new ArrayList<>();
-
+        particleVolume = new ArrayList<>();
+        particlePeriphery = new ArrayList<>();
     }
 
     @Override
     public void run() {
-        String outputImageFilePath = "img/result." + extension;
-        String test = "img/test." + extension;
         if (this.size != 0) {
             image = new BufferedImage(size, size, BufferedImage.TYPE_3BYTE_BGR);
 
@@ -51,11 +53,13 @@ public class ParticleDetectionController extends Thread {
             gc.updateImg(outputImageFilePath);
         }
 
+        ImageController.writeImage(image, inputImageFilePath, extension);
         seedAlgorithm(image);
-        ImageController.writeImage(image, test, extension);
-        gc.updateImg(test);
-        gc.updateResult("Počet nalezených stop: "+particleRadius.size());
+        ImageController.writeImage(image, outputImageFilePath, extension);
+        if (gc.debugMode) gc.updateImg(outputImageFilePath);
+        else gc.updateResult(inputImageFilePath);
 
+        gc.updateResult("Počet nalezených stop: " + particleVolume.size());
         executeMethod();
 
 //        outputImageFilePath = "img/result."+extension;
@@ -80,6 +84,9 @@ public class ParticleDetectionController extends Thread {
                 if (val == Color.WHITE.getRGB()) {
                     particleContent++;
                     img.setRGB(i, j, Color.RED.getRGB());
+
+                    // obvod
+                    countPeriphery(img, i, j);
                     // 4okoli-8okoli do zasobniku
                     check8d(s, img, i, j);
 
@@ -97,8 +104,8 @@ public class ParticleDetectionController extends Thread {
                     g.drawString(particleContent + "", i, j);
                     g.dispose();
 
-                    particleRadius.add(particleContent);
-                    particleContent=0;
+                    particleVolume.add(particleContent);
+                    particleContent = 0;
                 }
             }
 
@@ -107,11 +114,52 @@ public class ParticleDetectionController extends Thread {
         }
     }
 
+    private void countPeriphery(BufferedImage img, int x, int y) {
+        double periphery = 0;
+        Point p = new Point(x, y);
+        Point tmp;
+        int counter = 0;
+        boolean flag = true;
+
+        ArrayList<Point> surrounding = new ArrayList<>();
+        surrounding.add(new Point(0, -1));
+        surrounding.add(new Point(+1, -1));
+
+        surrounding.add(new Point(+1, 0));
+        surrounding.add(new Point(+1, +1));
+
+        surrounding.add(new Point(0, +1));
+        surrounding.add(new Point(-1, +1));
+
+        surrounding.add(new Point(-1, 0));
+        surrounding.add(new Point(-1, -1));
+
+        do {
+            tmp = surrounding.get(counter);
+            while ((p.x+tmp.x) < 0 || (p.x+tmp.x) > img.getWidth()-1 || (p.y + tmp.y) < 0 || (p.y + tmp.y) > img.getHeight() - 1){
+                counter=(counter+1)%8;
+                tmp = surrounding.get(counter);
+            }
+
+            int val = img.getRGB(p.x + tmp.x, p.y + tmp.y);
+            if (val == Color.WHITE.getRGB() || val == Color.RED.getRGB()) {
+                periphery++;
+                counter-=2;
+                if (counter<0) counter+=8;
+                p.setLocation(p.x+tmp.x, p.y+tmp.y);
+                flag = false;
+            }else{
+                counter=(counter+1)%8;
+            }
+        } while (flag || img.getRGB(p.x, p.y) != Color.RED.getRGB());
+        particlePeriphery.add(periphery);
+    }
+
     private void check8d(Stack<Point> s, BufferedImage img, int x, int y) {
         for (int i = -1; i <= 1; i++) {
-            if ((x+i)<0 || (x+i)>img.getWidth()-1) continue;
+            if ((x + i) < 0 || (x + i) > img.getWidth() - 1) continue;
             for (int j = -1; j <= 1; j++) {
-                if((y+j)<0 || (y+j)>img.getHeight()-1) continue;
+                if ((y + j) < 0 || (y + j) > img.getHeight() - 1) continue;
 
                 int val = img.getRGB(x + i, y + j);
                 if (!(i == 0 && j == 0) && val == Color.WHITE.getRGB()) {
@@ -122,34 +170,36 @@ public class ParticleDetectionController extends Thread {
     }
 
     public void executeMethod() {
-        if (particleRadius.size()==0){
-            gc.histSettings.setDisable(true);
+        if (particleVolume.size() == 0) {
+            gc.histVB.setDisable(true);
             gc.updateResult("Nenalezeny žádné stopy!");
             return;
         }
 
         if (gc.rbm1.isSelected()) {
-            SimpleMethod sm = new SimpleMethod(particleRadius);
+            SimpleMethod sm = new SimpleMethod(particleVolume);
             if (gc.rbp1.isSelected()) sm.doMean();
             else if (gc.rbp2.isSelected()) sm.doMedian();
             else if (gc.rbp3.isSelected()) sm.doMidRange();
-            gc.updateResult("Počet nalezených stop: "+sm.getResult());
-        }
-        else if (gc.rbm2.isSelected()){
-            if (gc.histSlider.getMax() != particleRadius.size()) {
-                gc.histSlider.setMax(particleRadius.size());
-                gc.histSlider.setValue(particleRadius.size() * 0.1);
-                gc.histSlider.setBlockIncrement(particleRadius.size() / 100.0);
-                gc.histSlider.setMajorTickUnit(particleRadius.size() / 10.0);
-                gc.histSlider.setMinorTickCount((int) (particleRadius.size() / 10.0) / 2);
-            }else {
-                sh = new SurfaceHistogram(particleRadius, gc.histSlider.getValue());
+            gc.updateResult("Počet nalezených stop: " + sm.getResult());
+        } else if (gc.rbm2.isSelected()) {
+            if (gc.histSlider.getMax() != particleVolume.size()) {
+                gc.histSlider.setMax(particleVolume.size());
+                gc.histSlider.setValue(particleVolume.size() * 0.1);
+                gc.histSlider.setBlockIncrement(particleVolume.size() / 100.0);
+                gc.histSlider.setMajorTickUnit(particleVolume.size() / 10.0);
+                gc.histSlider.setMinorTickCount((int) (particleVolume.size() / 10.0) / 2);
+            } else {
+                sh = new SurfaceHistogram(particleVolume, gc.histSlider.getValue());
                 gc.updateHist(sh.getHist());
-                gc.updateResult("Počet nalezených stop: "+sh.getResult());
+                gc.updateResult("Počet nalezených stop: " + sh.getResult());
             }
+        } else if (gc.rbm3.isSelected()) new RingDetection();
+        else if (gc.rbm4.isSelected()) {
+            DistanceField df = new DistanceField(particleVolume, particlePeriphery);
+//            if (gc.rbd1.isSelected()) df.check4d();
+//            else if (gc.rbd2.isSelected()) df.check8d();
         }
-        else if (gc.rbm3.isSelected()) new RingDetection();
-        else if (gc.rbm4.isSelected()) new DistanceField();
     }
 
     private BufferedImage generateParticles(BufferedImage img) {
@@ -161,7 +211,7 @@ public class ParticleDetectionController extends Thread {
         for (int i = 0; i < partNum; i++) {
             Random r = new Random();
             double radius = r.nextDouble() * (max - min) + min;
-            g.fillOval((int)(r.nextInt(size) - radius / 2), (int)(r.nextInt(size) - radius / 2), (int)radius, (int)radius);
+            g.fillOval((int) (r.nextInt(size) - radius / 2), (int) (r.nextInt(size) - radius / 2), (int) radius, (int) radius);
         }
         g.dispose();
         return img;
@@ -171,7 +221,7 @@ public class ParticleDetectionController extends Thread {
         gc.updateProgress(value);
     }
 
-    public SurfaceHistogram getSH(){
+    public SurfaceHistogram getSH() {
         return sh;
     }
 
