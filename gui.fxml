@@ -403,6 +403,17 @@
                               <Font name="Noto Sans Regular" size="13.0" />
                            </font>
                         </RadioButton>
+                        <Separator>
+                           <VBox.margin>
+                              <Insets bottom="10.0" top="10.0" />
+                           </VBox.margin>
+                        </Separator>
+                        <Label text="Max distance">
+                           <font>
+                              <Font name="Noto Sans Regular" size="13.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="tfd1" text="8" />
                      </children>
                      <padding>
                         <Insets left="20.0" top="10.0" />

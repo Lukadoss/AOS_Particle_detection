@@ -37,7 +37,7 @@ public class GuiController {
     public Pane pnIN;
     public ProgressBar progB;
     public RadioButton rbm1, rbm2, rbm3, rbm4, rbp1, rbp2, rbp3, rbh1, rbh2, rbd1, rbd2;
-    public TextField tf1, tf2, tf3, tf4, tfr1, tfr2;
+    public TextField tf1, tf2, tf3, tf4, tfr1, tfr2, tfd1;
     public Label wi, wi1, wi2, wi3, wi4, wir1, wir2, progT, resultLabel, picWarning;
     public BarChart<Number, String> histogram;
     public GridPane grid;
@@ -84,6 +84,7 @@ public class GuiController {
         listenTextBox(tf4);
         listenTextBox(tfr1);
         listenTextBox(tfr2);
+        listenTextBox(tfd1);
     }
 
     private void initHistogram() {
@@ -382,6 +383,7 @@ public class GuiController {
         if (tf2.getText().equals("")) tf2.setText("100");
         if (tf3.getText().equals("")) tf3.setText("10");
         if (tf4.getText().equals("")) tf4.setText("20");
+        tfd1.setText("0");
 
         if (pdc != null) {
             pdc.stop();
@@ -411,9 +413,11 @@ public class GuiController {
     }
 
     public void updateError(String err){
-        if (!debugMode) return;
-        else if (!err.isEmpty()) wi.setText(err);
-        else wi.setText("Chyba při výpočtu obvodu");
-        wi.setVisible(true);
+        Platform.runLater(()->{
+            if (!debugMode) return;
+            else if (!err.isEmpty()) wi.setText(err);
+            else wi.setText("Chyba při výpočtu obvodu");
+            wi.setVisible(true);
+        });
     }
 }

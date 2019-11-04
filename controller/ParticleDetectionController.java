@@ -196,7 +196,7 @@ public class ParticleDetectionController extends Thread {
             gc.updateResult("Počet nalezených stop: "+rd.getResult());
         }
         else if (gc.rbm4.isSelected()) {
-            DistanceField df = new DistanceField(ImageController.readImage(inputImageFilePath), this);
+            DistanceField df = new DistanceField(ImageController.readImage(inputImageFilePath), this, Double.parseDouble(gc.tfd1.getText()));
             if (gc.rbd1.isSelected()) df.calculateParticles(false);
             else if (gc.rbd2.isSelected()) df.calculateParticles(true);
             gc.updateImg(df.getDFImage());
@@ -225,6 +225,10 @@ public class ParticleDetectionController extends Thread {
 
     public SurfaceHistogram getSH() {
         return sh;
+    }
+
+    public GuiController getGc(){
+        return gc;
     }
 
 }
