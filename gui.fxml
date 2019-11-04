@@ -194,12 +194,17 @@
                         <Insets top="10.0" />
                      </VBox.margin>
                   </Label>
+                  <Label fx:id="wi" layoutX="71.0" layoutY="306.0" text="Chyba při výpočtu obvodu" textFill="RED" visible="false">
+                     <font>
+                        <Font name="Noto Sans Regular" size="13.0" />
+                     </font>
+                  </Label>
                   <Label fx:id="resultLabel" alignment="CENTER" contentDisplay="CENTER" ellipsisString="" text="Počet nalezených stop: " textAlignment="CENTER" textOverrun="CLIP" wrapText="true">
                      <font>
                         <Font name="Noto Sans Regular" size="14.0" />
                      </font>
                      <VBox.margin>
-                        <Insets top="10.0" />
+                        <Insets />
                      </VBox.margin>
                   </Label>
                </children>
@@ -353,6 +358,35 @@
                   </VBox>
                   <VBox fx:id="ringVB" visible="false">
                      <children>
+                        <Label text="Volitelná proměnná K">
+                           <font>
+                              <Font name="Noto Sans Regular" size="13.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="tfr1" disable="true" text="1" />
+                        <Label fx:id="wir1" text="Špatný vstup" textFill="RED" visible="false">
+                           <font>
+                              <Font name="Noto Sans Regular" size="13.0" />
+                           </font>
+                        </Label>
+                        <Label text="Volitelná proměnná L">
+                           <font>
+                              <Font name="Noto Sans Regular" size="13.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="tfr2" disable="true" text="1" />
+                        <Label fx:id="wir2" text="Špatný vstup" textFill="RED" visible="false">
+                           <font>
+                              <Font name="Noto Sans Regular" size="13.0" />
+                           </font>
+                        </Label>
+                     </children>
+                     <padding>
+                        <Insets left="20.0" top="10.0" />
+                     </padding>
+                  </VBox>
+                  <VBox fx:id="distanceVB" visible="false">
+                     <children>
                         <RadioButton fx:id="rbd1" contentDisplay="CENTER" mnemonicParsing="false" selected="true" text="4-okolí">
                            <VBox.margin>
                               <Insets />
@@ -362,29 +396,6 @@
                            </font>
                         </RadioButton>
                         <RadioButton fx:id="rbd2" contentDisplay="CENTER" mnemonicParsing="false" text="8-okolí">
-                           <VBox.margin>
-                              <Insets top="10.0" />
-                           </VBox.margin>
-                           <font>
-                              <Font name="Noto Sans Regular" size="13.0" />
-                           </font>
-                        </RadioButton>
-                     </children>
-                     <padding>
-                        <Insets left="20.0" top="10.0" />
-                     </padding>
-                  </VBox>
-                  <VBox fx:id="distanceVB" visible="false">
-                     <children>
-                        <RadioButton fx:id="rbd11" contentDisplay="CENTER" mnemonicParsing="false" selected="true" text="4-okolí">
-                           <VBox.margin>
-                              <Insets />
-                           </VBox.margin>
-                           <font>
-                              <Font name="Noto Sans Regular" size="13.0" />
-                           </font>
-                        </RadioButton>
-                        <RadioButton fx:id="rbd21" contentDisplay="CENTER" mnemonicParsing="false" text="8-okolí">
                            <VBox.margin>
                               <Insets top="10.0" />
                            </VBox.margin>

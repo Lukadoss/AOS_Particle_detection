@@ -37,8 +37,8 @@ public class GuiController {
     public Pane pnIN;
     public ProgressBar progB;
     public RadioButton rbm1, rbm2, rbm3, rbm4, rbp1, rbp2, rbp3, rbh1, rbh2, rbd1, rbd2;
-    public TextField tf1, tf2, tf3, tf4;
-    public Label wi1, wi2, wi3, wi4, progT, resultLabel, picWarning;
+    public TextField tf1, tf2, tf3, tf4, tfr1, tfr2;
+    public Label wi, wi1, wi2, wi3, wi4, wir1, wir2, progT, resultLabel, picWarning;
     public BarChart<Number, String> histogram;
     public GridPane grid;
     public VBox simpleVB, histVB, ringVB, distanceVB;
@@ -59,7 +59,31 @@ public class GuiController {
 
             initRadioButtons();
             initHistogram();
+            initTextFields();
         }
+    }
+
+    private void listenTextBox(TextField textField) {
+        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue.matches("\\d{0,7}([.]\\d{0,4})?")) {
+                textField.setText(oldValue);
+            }
+
+            if ((textField.getId().equals("tfr1") || textField.getId().equals("tfr2")) && isParsable(textField.getText())) {
+                if (Double.parseDouble(textField.getText()) < 0){
+                    textField.setText(oldValue);
+                }
+            }
+        });
+    }
+
+    private void initTextFields() {
+        listenTextBox(tf1);
+        listenTextBox(tf2);
+        listenTextBox(tf3);
+        listenTextBox(tf4);
+        listenTextBox(tfr1);
+        listenTextBox(tfr2);
     }
 
     private void initHistogram() {
@@ -110,7 +134,7 @@ public class GuiController {
             }
         });
 
-        histogram.setOnKeyPressed(event->{
+        histogram.setOnKeyPressed(event -> {
             System.out.println(event.getCode());
         });
     }
@@ -146,63 +170,6 @@ public class GuiController {
 
     public void solve(ActionEvent actionEvent) {
         pdc.executeMethod();
-    }
-
-    private boolean checkTFinput() {
-        boolean inputs = true;
-        wi1.setVisible(false);
-        wi2.setVisible(false);
-        wi3.setVisible(false);
-        wi4.setVisible(false);
-
-        if (!isParsable(tf1.getText())) {
-            wi1.setVisible(true);
-            inputs = false;
-        } else {
-            if (Integer.parseInt(tf1.getText()) <= 0) {
-                wi1.setVisible(true);
-                inputs = false;
-            }
-        }
-
-        if (!isParsable(tf2.getText())) {
-            wi2.setVisible(true);
-            inputs = false;
-        } else {
-            if (Integer.parseInt(tf2.getText()) <= 0) {
-                wi2.setVisible(true);
-                inputs = false;
-            }
-        }
-
-        if (!isParsable(tf3.getText())) {
-            wi3.setVisible(true);
-            inputs = false;
-        } else {
-            if (Integer.parseInt(tf3.getText()) <= 0) {
-                wi3.setVisible(true);
-                inputs = false;
-            }
-        }
-
-        if (!isParsable(tf4.getText())) {
-            wi4.setText("Špatný vstup");
-            wi4.setVisible(true);
-            inputs = false;
-        } else {
-            if (Integer.parseInt(tf4.getText()) <= 0) {
-                wi4.setVisible(true);
-                inputs = false;
-            }
-        }
-
-        if (inputs && Integer.parseInt(tf3.getText()) > Integer.parseInt(tf4.getText())) {
-            wi4.setText("Max > Min!");
-            wi4.setVisible(true);
-            inputs = false;
-        }
-
-        return inputs;
     }
 
     public void openFile(ActionEvent actionEvent) {
@@ -312,7 +279,7 @@ public class GuiController {
     private static boolean isParsable(String input) {
         boolean parsable = true;
         try {
-            Integer.parseInt(input);
+            Double.parseDouble(input);
         } catch (NumberFormatException e) {
             parsable = false;
         }
@@ -327,11 +294,11 @@ public class GuiController {
         Platform.runLater(() -> {
             boolean flag = true;
             histVB.setDisable(false);
-            histogram.setData(FXCollections.observableArrayList(data)) ;
+            histogram.setData(FXCollections.observableArrayList(data));
 
             for (XYChart.Series<Number, String> serie : histogram.getData()) {
                 for (XYChart.Data<Number, String> item : serie.getData()) {
-                    if (item.getXValue().intValue()==pdc.getSH().getRefValue() && flag){
+                    if (item.getXValue().intValue() == pdc.getSH().getRefValue() && flag) {
                         item.getNode().setStyle("-fx-bar-fill: green");
                         flag = false;
                     }
@@ -345,7 +312,7 @@ public class GuiController {
                         pdc.getSH().setRefValue(item);
                         pdc.getSH().calculateExpo();
                         updateHist(pdc.getSH().getHist());
-                        updateResult("Počet nalezených stop: "+pdc.getSH().getResult());
+                        updateResult("Počet nalezených stop: " + pdc.getSH().getResult());
                     });
                 }
             }
@@ -411,27 +378,42 @@ public class GuiController {
     }
 
     public void generate(ActionEvent actionEvent) {
+        if (tf1.getText().equals("")) tf1.setText("512");
+        if (tf2.getText().equals("")) tf2.setText("100");
+        if (tf3.getText().equals("")) tf3.setText("10");
+        if (tf4.getText().equals("")) tf4.setText("20");
+
         if (pdc != null) {
             pdc.stop();
         }
 
-        if (actionEvent.getSource().getClass().equals(Button.class) && checkTFinput()) {
+        if (actionEvent.getSource().getClass().equals(Button.class)) {
             aspectRatio = 1;
-            pdc = new ParticleDetectionController(this, Integer.parseInt(tf1.getText()), Integer.parseInt(tf2.getText()),
-                    Integer.parseInt(tf3.getText()), Integer.parseInt(tf4.getText()));
+            pdc = new ParticleDetectionController(this, (int)Double.parseDouble(tf1.getText()), (int)Double.parseDouble(tf2.getText()),
+                    Double.parseDouble(tf3.getText()), Double.parseDouble(tf4.getText()));
             pdc.start();
         } else {
             pdc = new ParticleDetectionController(this, filePath, ext);
             pdc.start();
         }
         solve.setDisable(false);
+        tfr1.setDisable(false);
+        tfr2.setDisable(false);
+        wi.setVisible(false);
     }
 
     public void setDebug(ActionEvent actionEvent) {
-        if (debugCheckBox.isSelected()){
+        if (debugCheckBox.isSelected()) {
             debugMode = true;
-        }else{
+        } else {
             debugMode = false;
         }
+    }
+
+    public void updateError(String err){
+        if (!debugMode) return;
+        else if (!err.isEmpty()) wi.setText(err);
+        else wi.setText("Chyba při výpočtu obvodu");
+        wi.setVisible(true);
     }
 }

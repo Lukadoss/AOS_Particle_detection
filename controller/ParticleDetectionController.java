@@ -5,7 +5,6 @@ import methods.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.Random;
 import java.util.Stack;
 
@@ -18,7 +17,8 @@ public class ParticleDetectionController extends Thread {
     private String inputImageFilePath = "img/input." + extension;
 
     private GuiController gc;
-    private int size, partNum, min, max;
+    private int size, partNum;
+    private double min, max;
     private ArrayList<Double> particleVolume;
     private ArrayList<Double> particlePeriphery;
     private BufferedImage image;
@@ -30,7 +30,7 @@ public class ParticleDetectionController extends Thread {
         this.image = ImageController.readImage(fileLoc);
     }
 
-    ParticleDetectionController(GuiController gc, int size, int partNumber, int minPart, int maxPart) {
+    ParticleDetectionController(GuiController gc, int size, int partNumber, double minPart, double maxPart) {
         this.gc = gc;
         this.size = size;
         this.partNum = partNumber;
@@ -44,31 +44,19 @@ public class ParticleDetectionController extends Thread {
     public void run() {
         if (this.size != 0) {
             image = new BufferedImage(size, size, BufferedImage.TYPE_3BYTE_BGR);
-
             generateParticles(image);
-
-            updProg(-1);
-            ImageController.writeImage(image, outputImageFilePath, extension);
-            updProg(1);
-            gc.updateImg(outputImageFilePath);
         }
 
         ImageController.writeImage(image, inputImageFilePath, extension);
         seedAlgorithm(image);
+        updProg(-1);
         ImageController.writeImage(image, outputImageFilePath, extension);
+        updProg(1);
         if (gc.debugMode) gc.updateImg(outputImageFilePath);
-        else gc.updateResult(inputImageFilePath);
+        else gc.updateImg(inputImageFilePath);
 
         gc.updateResult("Počet nalezených stop: " + particleVolume.size());
         executeMethod();
-
-//        outputImageFilePath = "img/result."+extension;
-//        image = new Masks(image, 1, -1,this).getImg();
-
-//        updProg(-1);
-//        ImageController.writeImage(image, outputImageFilePath, extension);
-//        updProg(1);
-//        gc.updateImg(outputImageFilePath);
     }
 
     /**
@@ -118,6 +106,7 @@ public class ParticleDetectionController extends Thread {
         double periphery = 0;
         Point p = new Point(x, y);
         Point tmp;
+        int loopChecker = 0;
         int counter = 0;
         boolean flag = true;
 
@@ -148,7 +137,13 @@ public class ParticleDetectionController extends Thread {
                 if (counter<0) counter+=8;
                 p.setLocation(p.x+tmp.x, p.y+tmp.y);
                 flag = false;
+                loopChecker = 0;
             }else{
+                if (loopChecker>8) {
+                    gc.updateError("");
+                    break;
+                }
+                loopChecker++;
                 counter=(counter+1)%8;
             }
         } while (flag || img.getRGB(p.x, p.y) != Color.RED.getRGB());
@@ -170,6 +165,8 @@ public class ParticleDetectionController extends Thread {
     }
 
     public void executeMethod() {
+        gc.updateImg(outputImageFilePath);
+
         if (particleVolume.size() == 0) {
             gc.histVB.setDisable(true);
             gc.updateResult("Nenalezeny žádné stopy!");
@@ -194,11 +191,16 @@ public class ParticleDetectionController extends Thread {
                 gc.updateHist(sh.getHist());
                 gc.updateResult("Počet nalezených stop: " + sh.getResult());
             }
-        } else if (gc.rbm3.isSelected()) new RingDetection();
+        } else if (gc.rbm3.isSelected()) {
+            RingDetection rd = new RingDetection(particleVolume, particlePeriphery, Double.parseDouble(gc.tfr1.getText()), Double.parseDouble(gc.tfr2.getText()));
+            gc.updateResult("Počet nalezených stop: "+rd.getResult());
+        }
         else if (gc.rbm4.isSelected()) {
-            DistanceField df = new DistanceField(particleVolume, particlePeriphery);
-//            if (gc.rbd1.isSelected()) df.check4d();
-//            else if (gc.rbd2.isSelected()) df.check8d();
+            DistanceField df = new DistanceField(ImageController.readImage(inputImageFilePath), this);
+            if (gc.rbd1.isSelected()) df.calculateParticles(false);
+            else if (gc.rbd2.isSelected()) df.calculateParticles(true);
+            gc.updateImg(df.getDFImage());
+            gc.updateResult("Počet nalezených stop: "+df.getResult());
         }
     }
 
