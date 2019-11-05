@@ -18,6 +18,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
@@ -70,11 +71,19 @@ public class GuiController {
             }
 
             if ((textField.getId().equals("tfr1") || textField.getId().equals("tfr2")) && isParsable(textField.getText())) {
-                if (Double.parseDouble(textField.getText()) < 0){
+                if (Double.parseDouble(textField.getText()) < 0) {
                     textField.setText(oldValue);
                 }
             }
         });
+
+        if (textField.getId().equals("tfr1") || textField.getId().equals("tfr2") || textField.getId().equals("tfd1")){
+            textField.setOnKeyPressed(event->{
+                if (event.getCode().equals(KeyCode.ENTER) && ivIN.getImage() != null){
+                    if (!textField.getText().equals("")) pdc.executeMethod();
+                }
+            });
+        }
     }
 
     private void initTextFields() {
@@ -329,8 +338,6 @@ public class GuiController {
             animateHist(200);
             rbh1.setSelected(true);
 
-            if (ivIN.getImage() != null) pdc.executeMethod();
-
             switch (((RadioButton) tg.getSelectedToggle()).getId()) {
                 case "rbm1":
                     simpleVB.setVisible(true);
@@ -344,6 +351,17 @@ public class GuiController {
                 case "rbm4":
                     distanceVB.setVisible(true);
             }
+
+            Platform.runLater(() -> {
+                if (tfr1.getText().equals("")) {
+                    tfr1.setText("1");
+                }
+                if (tfr2.getText().equals("")) {
+                    tfr2.setText("1");
+                }
+                if (ivIN.getImage() != null) pdc.executeMethod();
+            });
+
         });
     }
 
@@ -355,6 +373,7 @@ public class GuiController {
                 case "rbp3":
                 case "rbd1":
                 case "rbd2":
+                    tfd1.setText("0");
                     if (ivIN.getImage() != null) pdc.executeMethod();
                     break;
                 case "rbh1":
@@ -391,7 +410,7 @@ public class GuiController {
 
         if (actionEvent.getSource().getClass().equals(Button.class)) {
             aspectRatio = 1;
-            pdc = new ParticleDetectionController(this, (int)Double.parseDouble(tf1.getText()), (int)Double.parseDouble(tf2.getText()),
+            pdc = new ParticleDetectionController(this, (int) Double.parseDouble(tf1.getText()), (int) Double.parseDouble(tf2.getText()),
                     Double.parseDouble(tf3.getText()), Double.parseDouble(tf4.getText()));
             pdc.start();
         } else {
@@ -401,19 +420,22 @@ public class GuiController {
         solve.setDisable(false);
         tfr1.setDisable(false);
         tfr2.setDisable(false);
+        tfd1.setDisable(false);
         wi.setVisible(false);
     }
 
     public void setDebug(ActionEvent actionEvent) {
         if (debugCheckBox.isSelected()) {
             debugMode = true;
+            solve.setVisible(true);
         } else {
             debugMode = false;
+            solve.setVisible(false);
         }
     }
 
-    public void updateError(String err){
-        Platform.runLater(()->{
+    public void updateError(String err) {
+        Platform.runLater(() -> {
             if (!debugMode) return;
             else if (!err.isEmpty()) wi.setText(err);
             else wi.setText("Chyba při výpočtu obvodu");

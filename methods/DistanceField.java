@@ -68,13 +68,14 @@ public class DistanceField {
             threshold = maximum;
         }
 
+//        printArray(field);
+//        System.out.println("-----------------");
+
         seedAlgorithm(image, maximum);
         pdc.updProg(-1);
         ImageController.writeImage(image, dfImageFilePath, extension);
         pdc.updProg(1);
 
-//        printArray(field);
-//        System.out.println("-----------------");
     }
 
     private void seedAlgorithm(BufferedImage img, int maximum) {
@@ -160,6 +161,9 @@ public class DistanceField {
         for (Point max : dMax) {
             g.drawOval((int) (max.y - threshold / 2), (int) (max.x - threshold / 2), (int) threshold, (int) threshold);
         }
+
+//        System.out.println(dMaxLocal);
+//        System.out.println(dMax);
         result = dMax.size();
     }
 
