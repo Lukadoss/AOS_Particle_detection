@@ -19,21 +19,22 @@ public class SurfaceHistogram {
         refData = new XYChart.Data<>(0,"");
 
         for (int i = 0; i < particleRadius.size(); i++) {
+            int y = (int)(divider-step/2 );
             if (particleRadius.get(i)<=divider){
 //                System.out.println(particleRadius.get(i)+" : "+divider);
                 count++;
             }else{
 //                System.out.println(particleRadius.get(i)+" : "+divider);
-                data.getData().add(new XYChart.Data<>(count, ""+(int)(divider-step)));
+                data.getData().add(new XYChart.Data<>(count, ""+y));
                 if (refData.getXValue().doubleValue()<count){ refData = data.getData().get(data.getData().size()-1);}
                 count = 1;
                 divider+=step;
                 while(divider<particleRadius.get(i)){
-                    data.getData().add(new XYChart.Data<>(0, ""+(int)(divider-step)));
+                    data.getData().add(new XYChart.Data<>(0, ""+y));
                     divider+=step;
                 }
             }
-            if (i+1==particleRadius.size()) data.getData().add(new XYChart.Data<>(count, ""+(int)(divider-step)));
+            if (i+1==particleRadius.size()) data.getData().add(new XYChart.Data<>(count, ""+y));
         }
         if (refData.getXValue().doubleValue()<count){ refData = data.getData().get(data.getData().size()-1);}
 

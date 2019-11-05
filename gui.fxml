@@ -138,7 +138,7 @@
                         <Font name="Noto Sans Bold" size="14.0" />
                      </font>
                     </Button>
-                  <CheckBox fx:id="debugCheckBox" mnemonicParsing="false" onAction="#setDebug" selected="true" text="Debug mód">
+                  <CheckBox fx:id="debugCheckBox" mnemonicParsing="false" onAction="#setDebug" text="Debug mód">
                      <font>
                         <Font name="Noto Sans Regular" size="13.0" />
                      </font>
@@ -198,6 +198,14 @@
                      <font>
                         <Font name="Noto Sans Regular" size="13.0" />
                      </font>
+                  </Label>
+                  <Label fx:id="expoLabel" alignment="CENTER" contentDisplay="CENTER" ellipsisString="" layoutX="33.0" layoutY="565.0" text="Počet expozic:" textAlignment="CENTER" textOverrun="CLIP" wrapText="true">
+                     <font>
+                        <Font name="Noto Sans Regular" size="14.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets bottom="10.0" />
+                     </VBox.margin>
                   </Label>
                   <Label fx:id="resultLabel" alignment="CENTER" contentDisplay="CENTER" ellipsisString="" text="Počet nalezených stop: " textAlignment="CENTER" textOverrun="CLIP" wrapText="true">
                      <font>

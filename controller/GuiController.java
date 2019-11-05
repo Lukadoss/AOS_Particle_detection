@@ -38,13 +38,13 @@ public class GuiController {
     public ProgressBar progB;
     public RadioButton rbm1, rbm2, rbm3, rbm4, rbp1, rbp2, rbp3, rbh1, rbh2, rbd1, rbd2;
     public TextField tf1, tf2, tf3, tf4, tfr1, tfr2, tfd1;
-    public Label wi, wi1, wi2, wi3, wi4, wir1, wir2, progT, resultLabel, picWarning;
+    public Label wi, wi1, wi2, wi3, wi4, wir1, wir2, progT, resultLabel, picWarning, expoLabel;
     public BarChart<Number, String> histogram;
     public GridPane grid;
     public VBox simpleVB, histVB, ringVB, distanceVB;
     public Slider histSlider;
 
-    public boolean debugMode = true;
+    public boolean debugMode = false;
     public CheckBox debugCheckBox;
     private ParticleDetectionController pdc;
     private String ext, filePath;
@@ -291,9 +291,9 @@ public class GuiController {
         Platform.runLater(() -> resultLabel.setText(result));
     }
 
-    public void updateHist(XYChart.Series<Number, String> data) {
+    public void updateHist(XYChart.Series<Number, String> data, boolean f) {
         Platform.runLater(() -> {
-            boolean flag = true;
+            boolean flag = f;
             histVB.setDisable(false);
             histogram.setData(FXCollections.observableArrayList(data));
 
@@ -312,7 +312,7 @@ public class GuiController {
                         item.getNode().setStyle("-fx-bar-fill: green");
                         pdc.getSH().setRefValue(item);
                         pdc.getSH().calculateExpo();
-                        updateHist(pdc.getSH().getHist());
+                        updateHist(pdc.getSH().getHist(), false);
                         updateResult("Počet nalezených stop: " + pdc.getSH().getResult());
                     });
                 }
@@ -419,5 +419,9 @@ public class GuiController {
             else wi.setText("Chyba při výpočtu obvodu");
             wi.setVisible(true);
         });
+    }
+
+    public void updateRealExpo(String s) {
+        Platform.runLater(() -> expoLabel.setText(s));
     }
 }

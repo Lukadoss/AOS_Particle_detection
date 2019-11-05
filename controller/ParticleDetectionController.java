@@ -52,10 +52,8 @@ public class ParticleDetectionController extends Thread {
         updProg(-1);
         ImageController.writeImage(image, outputImageFilePath, extension);
         updProg(1);
-        if (gc.debugMode) gc.updateImg(outputImageFilePath);
-        else gc.updateImg(inputImageFilePath);
 
-        gc.updateResult("Počet nalezených stop: " + particleVolume.size());
+        gc.updateRealExpo("Počet expozic: " + particleVolume.size());
         executeMethod();
     }
 
@@ -165,7 +163,8 @@ public class ParticleDetectionController extends Thread {
     }
 
     public void executeMethod() {
-        gc.updateImg(outputImageFilePath);
+        if (gc.debugMode) gc.updateImg(outputImageFilePath);
+        else gc.updateImg(inputImageFilePath);
 
         if (particleVolume.size() == 0) {
             gc.histVB.setDisable(true);
@@ -188,7 +187,7 @@ public class ParticleDetectionController extends Thread {
                 gc.histSlider.setMinorTickCount((int) (particleVolume.size() / 10.0) / 2);
             } else {
                 sh = new SurfaceHistogram(particleVolume, gc.histSlider.getValue());
-                gc.updateHist(sh.getHist());
+                gc.updateHist(sh.getHist(), true);
                 gc.updateResult("Počet nalezených stop: " + sh.getResult());
             }
         } else if (gc.rbm3.isSelected()) {
