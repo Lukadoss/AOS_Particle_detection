@@ -77,9 +77,9 @@ public class GuiController {
             }
         });
 
-        if (textField.getId().equals("tfr1") || textField.getId().equals("tfr2") || textField.getId().equals("tfd1")){
-            textField.setOnKeyPressed(event->{
-                if (event.getCode().equals(KeyCode.ENTER) && ivIN.getImage() != null){
+        if (textField.getId().equals("tfr1") || textField.getId().equals("tfr2") || textField.getId().equals("tfd1")) {
+            textField.setOnKeyPressed(event -> {
+                if (event.getCode().equals(KeyCode.ENTER) && ivIN.getImage() != null) {
                     if (!textField.getText().equals("")) pdc.executeMethod();
                 }
             });

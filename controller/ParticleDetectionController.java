@@ -73,9 +73,9 @@ public class ParticleDetectionController extends Thread {
 
                     // obvod
                     countPeriphery(img, i, j);
-                    // 4okoli-8okoli do zasobniku
+                    // 8-okoli do zasobniku
                     check8d(s, img, i, j);
-
+                    // vytahnu body ze zasobniku
                     while (!s.empty()) {
                         Point p = s.pop();
                         if (img.getRGB(p.x, p.y) == Color.RED.getRGB()) continue;
@@ -123,26 +123,26 @@ public class ParticleDetectionController extends Thread {
 
         do {
             tmp = surrounding.get(counter);
-            while ((p.x+tmp.x) < 0 || (p.x+tmp.x) > img.getWidth()-1 || (p.y + tmp.y) < 0 || (p.y + tmp.y) > img.getHeight() - 1){
-                counter=(counter+1)%8;
+            while ((p.x + tmp.x) < 0 || (p.x + tmp.x) > img.getWidth() - 1 || (p.y + tmp.y) < 0 || (p.y + tmp.y) > img.getHeight() - 1) {
+                counter = (counter + 1) % 8;
                 tmp = surrounding.get(counter);
             }
 
             int val = img.getRGB(p.x + tmp.x, p.y + tmp.y);
             if (val == Color.WHITE.getRGB() || val == Color.RED.getRGB()) {
                 periphery++;
-                counter-=2;
-                if (counter<0) counter+=8;
-                p.setLocation(p.x+tmp.x, p.y+tmp.y);
+                counter -= 2;
+                if (counter < 0) counter += 8;
+                p.setLocation(p.x + tmp.x, p.y + tmp.y);
                 flag = false;
                 loopChecker = 0;
-            }else{
-                if (loopChecker>8) {
+            } else {
+                if (loopChecker > 8) {
                     gc.updateError("");
                     break;
                 }
                 loopChecker++;
-                counter=(counter+1)%8;
+                counter = (counter + 1) % 8;
             }
         } while (flag || img.getRGB(p.x, p.y) != Color.RED.getRGB());
         particlePeriphery.add(periphery);
@@ -192,14 +192,13 @@ public class ParticleDetectionController extends Thread {
             }
         } else if (gc.rbm3.isSelected()) {
             RingDetection rd = new RingDetection(particleVolume, particlePeriphery, Double.parseDouble(gc.tfr1.getText()), Double.parseDouble(gc.tfr2.getText()));
-            gc.updateResult("Počet nalezených stop: "+rd.getResult());
-        }
-        else if (gc.rbm4.isSelected()) {
+            gc.updateResult("Počet nalezených stop: " + rd.getResult());
+        } else if (gc.rbm4.isSelected()) {
             DistanceField df = new DistanceField(ImageController.readImage(inputImageFilePath), this, Double.parseDouble(gc.tfd1.getText()));
             if (gc.rbd1.isSelected()) df.calculateParticles(false);
             else if (gc.rbd2.isSelected()) df.calculateParticles(true);
             gc.updateImg(df.getDFImage());
-            gc.updateResult("Počet nalezených stop: "+df.getResult());
+            gc.updateResult("Počet nalezených stop: " + df.getResult());
         }
     }
 
@@ -226,7 +225,7 @@ public class ParticleDetectionController extends Thread {
         return sh;
     }
 
-    public GuiController getGc(){
+    public GuiController getGc() {
         return gc;
     }
 
